@@ -249,7 +249,8 @@ Each assistant is a command and the words to add to it for what the panel offers
 | `resume` | added to carry on a conversation, for programs that say what theirs is called; `{session}` is that name |
 | `continue` | added to carry on the last conversation, for programs that do not |
 | `model`, `models` | added to choose a model (`{model}`), and the models `/model` offers |
-| `ask` | added for a program that can ask before each thing it changes or runs, the way `claude` does: it is then given the question on its input as a line of JSON, prints a request for each thing it wants to do and reads the answer there. Leave it out for a program that cannot |
+| `live` | added for a program that reads its questions from its input, one line of JSON each, and stays for the whole conversation, the way `claude --input-format stream-json` does: one process answers all the questions, the next one is written to it, and a question can be given to it while it works. Leave it out for a program that is run once per question |
+| `ask` | added for a program that can ask before each thing it changes or runs, the way `claude` does: it prints a request for each thing it wants to do and reads the answer on its input. It needs `live`. Leave it out for a program that cannot |
 | `read_only`, `edit`, `run` | added for what Alt+M sets: only read; change files; change files and run commands. With none of the three, the program's own settings decide and the panel says so |
 | `context` | added to tell it which file is in front and what is selected (`{context}`); without it, that goes in front of the question |
 | `format` | `"text"` (the usual): what it prints is the answer. `"claude"`: it prints what `claude --output-format stream-json` prints |
@@ -263,13 +264,13 @@ Each assistant is a command and the words to add to it for what the panel offers
 
 | Key (in the panel) | What it does |
 |---|---|
-| Typing, Enter | write a question and send it; follow-ups carry on the same conversation |
+| Typing, Enter | write a question and send it; follow-ups carry on the same conversation. While it works, Enter keeps the question for when the answer ends, and Enter on the empty line then sends the kept question at once, into the answer |
 | Alt+Enter | start a new line in the question (pasted text keeps its lines too) |
 | / (at the start of the question) | list the panel's commands: `/model`, `/attach`, `/new`, `/resume`, `/mode`, `/undo`, `/changes`, `/copy`, `/bigger`, `/help`, `/hide`, and your own |
 | @ | pick a file to attach to the question; Backspace on an empty question takes the last one off |
 | Left / Right, Home / End, Backspace / Delete | edit the question |
 | Up / Down | bring back the questions asked before |
-| Esc | stop Claude while it is working; otherwise go back to the text (the panel stays) |
+| Esc | stop the answer Claude is working on; the conversation goes on from there. Otherwise go back to the text (the panel stays) |
 | Alt+M | what Claude may do: ask before each change or command; change files; only read; change files and run commands |
 | Alt+O | list the files Claude changed in its last answer, to open one |
 | Alt+U | undo Claude's changes: put those files back as they were before the answer |
@@ -286,6 +287,8 @@ Each assistant is a command and the words to add to it for what the panel offers
 - **Your own commands:** the `/` list also shows the commands and skills you have set up for Claude Code (in `.claude/commands` and `.claude/skills`, in the project or your home folder). Picking one puts `/name` on the question line, to send to `claude` with whatever you add. A `/name` the list does not know is put on the line the same way.
 - **Conversations are kept.** The `claude` command saves every conversation about a project, also the ones from its own terminal program and from VS Code. Ctrl+R lists them, newest first, each with how long ago it was and its first question; picking one shows what was said and your next question carries it on.
 - **What it does is shown as it does it**, the way coding assistants show it: each file read or searched as a line, each edit with the lines it took out in red and the lines it put in in green, each command with what it printed. Long ones are cut after twelve lines.
+- **One process for the conversation.** The `claude` command is started once for a conversation and given each question on its input, the way the VS Code extension does, so it keeps what it has read between questions and a follow-up starts at once. A new conversation, another model or another mode starts a new process, which carries the conversation on. Esc stops the answer it is on and keeps the conversation and the process; Esc again ends the process.
+- **The next question while it works.** Type it and press Enter: it is kept above the question line as **Next**, to go when the answer ends. Its buttons: **send now** gives it to Claude in the middle of the answer, which takes it into account at once; **change** puts it back on the line (Backspace on the empty line does the same); **drop** forgets it (Delete on the empty line). A second question kept goes under the first.
 - The answer appears word by word as Claude writes it, and the title shows how long it has been working.
 - Answers are shown as Markdown: headings and `**bold**` in bold, `` `code` `` in colour, list items with a bullet, and blocks of code set apart by a bar and coloured like code in the editor.
 - **Attached files** (`@`) are shown above the question, each as a piece of its own ending in `×`: click it to take that file off again, whatever you have typed. Backspace in an empty question takes off the last one, and `/detach` all of them.
