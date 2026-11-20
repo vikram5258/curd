@@ -1,37 +1,179 @@
 name: Release
 
-# The binaries are built elsewhere and arrive here as a branch named
-# incoming/<tag> with the packages in a folder `incoming`. This checks
-# them against their checksums, publishes them as the release <tag>, and
-# removes the branch.
+# Builds and publishes a release of curd.
+#
+# The source is in a private repository. A release starts there, with a
+# push here of a branch build/<tag> holding the file build/request (the
+# commit to build and the version) and build/notes.md. The jobs fetch
+# that commit with a key that can only read the source, test it on the
+# systems curd is released for, build the binaries and publish them.
+#
+# These logs are public and the source is not, so the compiler and the
+# tests run with their output thrown away: a step says that it passed or
+# that it failed, and no more. To see why something failed, run it in
+# the source repository.
 on:
   push:
-    branches: ["incoming/**"]
+    branches: ["build/**"]
 
 permissions:
-  contents: write
+  contents: read
+
+env:
+  SOURCE: vikram5258/crud-editor
+  BIN: curd
+  CARGO_TERM_COLOR: never
+
+defaults:
+  run:
+    shell: bash
 
 jobs:
-  release:
-    runs-on: ubuntu-latest
+  # The tests on macOS (Apple Silicon and Intel) and Windows. Linux is
+  # tested in the source repository, for every commit.
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-15, macos-15-intel, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+      - name: Fetch the source
+        env:
+          KEY: ${{ secrets.SOURCE_KEY }}
+        run: .github/fetch.sh
+      - run: rustup update stable >/dev/null 2>&1 && rustup default stable >/dev/null 2>&1
+      - name: Test
+        working-directory: source
+        run: |
+          if cargo test --locked --quiet >/dev/null 2>&1; then
+            echo "The tests passed"
+          else
+            echo "The tests failed. Their output is kept out of this log."
+            exit 1
+          fi
+
+  # The binary for every platform, built once.
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+          - os: ubuntu-24.04-arm
+            target: aarch64-unknown-linux-gnu
+          # Both Mac binaries are built on the Intel Mac runner (the Apple
+          # Silicon one is cross-compiled): its queue is shorter.
+          - os: macos-15-intel
+            target: aarch64-apple-darwin
+          - os: macos-15-intel
+            target: x86_64-apple-darwin
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch the source
+        env:
+          KEY: ${{ secrets.SOURCE_KEY }}
+        run: .github/fetch.sh
+      - run: rustup update stable >/dev/null 2>&1 && rustup default stable >/dev/null 2>&1 && rustup target add ${{ matrix.target }} >/dev/null 2>&1
+      - name: Build
+        working-directory: source
+        run: |
+          if cargo build --release --locked --quiet --target ${{ matrix.target }} >/dev/null 2>&1; then
+            echo "Built"
+          else
+            echo "The build failed. Its output is kept out of this log."
+            exit 1
+          fi
+          mkdir ../out
+          cp target/${{ matrix.target }}/release/$BIN ../out/ 2>/dev/null || cp target/${{ matrix.target }}/release/$BIN.exe ../out/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: curd-${{ matrix.target }}
+          path: out/
+          if-no-files-found: error
+
+  # Runs the Apple Silicon binary on an Apple Silicon Mac. It is built on
+  # an Intel Mac, so this is the proof that it starts where it is meant to.
+  check-apple-silicon:
+    needs: build
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - run: .github/fetch.sh --tag-only
+      - uses: actions/download-artifact@v4
+        with:
+          name: curd-aarch64-apple-darwin
+          path: bin
+      - name: Run it
+        run: |
+          chmod +x bin/curd
+          said=$(bin/curd --version)
+          echo "$said"
+          case "$said" in
+            "curd ${TAG#v} (aarch64-macos)") ;;
+            *) echo "That is not $TAG for Apple Silicon"; exit 1 ;;
+          esac
+
+  # Packages the binaries, publishes the release, and installs it the way
+  # a user would.
+  release:
+    needs: [test, build, check-apple-silicon]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - run: .github/fetch.sh --tag-only
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: curd-*
+          path: binaries
+      - name: Package
+        run: |
+          mkdir dist
+          for dir in binaries/curd-*; do
+            target=${dir#binaries/curd-}
+            name="$BIN-$TAG-$target"
+            mkdir "$name"
+            cp README.md LICENSE "$name/"
+            cp "$dir"/* "$name/"
+            if [ -f "$name/$BIN.exe" ]; then
+              zip -qr "dist/$name.zip" "$name"
+            else
+              # Artifacts don't keep the executable bit.
+              chmod +x "$name/$BIN"
+              tar czf "dist/$name.tar.gz" "$name"
+            fi
+          done
+          # Checksums, for anyone who wants to verify a download.
+          (cd dist && sha256sum * > SHA256SUMS)
+          ls -l dist
       - name: Publish
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          tag=${GITHUB_REF_NAME#incoming/}
-          case "$tag" in
-            v[0-9]*) ;;
-            *) echo "Not a version: $tag"; exit 1 ;;
-          esac
-          cd incoming
-          sha256sum -c SHA256SUMS
-          if gh release view "$tag" >/dev/null 2>&1; then
-            gh release upload "$tag" curd-* SHA256SUMS --clobber
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" dist/* --clobber
           else
-            gh release create "$tag" curd-* SHA256SUMS --target main --title "$tag" --notes-file notes.md
+            gh release create "$TAG" dist/* --target main --title "$TAG" --notes-file build/notes.md
           fi
+      - name: Install it the way a user does
+        run: |
+          for try in $(seq 30); do
+            curl -fsSL -o /dev/null "https://github.com/$GITHUB_REPOSITORY/releases/download/$TAG/SHA256SUMS" && break
+            sleep 5
+          done
+          CURD_VERSION="$TAG" CURD_INSTALL_DIR="$PWD/installed" sh install.sh
+          said=$(./installed/curd --version)
+          echo "$said"
+          case "$said" in
+            "curd ${TAG#v} "*) ;;
+            *) echo "That is not $TAG"; exit 1 ;;
+          esac
       - name: Remove the branch
-        if: always()
-        run: git push origin --delete "$GITHUB_REF_NAME"
+        run: git push --quiet origin --delete "$GITHUB_REF_NAME"
