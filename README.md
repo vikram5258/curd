@@ -44,7 +44,7 @@ The status bar is also the toolbar. Between the file's name and the position it 
 
 The tab bar is there with one file open as with several, so the text does not move down a row when a second file is opened, and the one file has its `×` to close it. A window under twelve rows keeps that row for the text, and `CURD_TABS=auto curd` shows the bar only for two files or more.
 
-Dark is chosen by itself when the terminal says it can show any colour (most do: it sets `COLORTERM=truecolor`). Otherwise you get classic. To choose: `CURD_THEME=light curd`, `CURD_THEME=dark curd` or `CURD_THEME=classic curd` (put `export CURD_THEME=light` in your shell profile to keep it).
+When the terminal says it can show any colour (most do: it sets `COLORTERM=truecolor`), curd asks it for its background and starts light on a light one and dark on a dark one (dark where it does not say). Otherwise you get classic. To choose: `CURD_THEME=light curd`, `CURD_THEME=dark curd` or `CURD_THEME=classic curd` (put `export CURD_THEME=light` in your shell profile to keep it).
 
 ## Keys
 
@@ -317,6 +317,7 @@ Each assistant is a command and the words to add to it for what the panel offers
 `curd` uses what a modern terminal (Ghostty, kitty, WezTerm, iTerm2, foot, Windows Terminal, the terminal in VS Code) can do beyond showing text, and does without where one cannot:
 
 - **Every frame in one go** (synchronized output), so a half-drawn screen is never seen.
+- **The look follows the terminal's background**: asked for it at the start, curd starts in its light look on a light terminal and its dark look on a dark one. `CURD_THEME` still decides where it is set.
 - **Shift+Enter** for a new line in the question, where the terminal tells it from Enter (kitty's keyboard protocol); Alt+Enter everywhere. The panel's hint says which. `CURD_KEYS=off` leaves the terminal unasked.
 - **The window title and tab** say what is going on: `curd · project`, and while Claude works, a spinner, its name and the step it is on. Terminals with a progress mark in the tab (Ghostty, kitty, Windows Terminal, VS Code) show one while it works.
 - **A notification when you are in another window**: when an answer is in, or when Claude asks something. The terminal puts it up the way it has (kitty's, Ghostty's, foot's and iTerm2's own; WezTerm's, Konsole's and GNOME's; a bell elsewhere), and only while the window is not in front. `CURD_NOTIFY=off` turns it off.
