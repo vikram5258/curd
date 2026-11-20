@@ -59,8 +59,11 @@ curl -fsSL "$url" -o "$tmp/curd.tar.gz" ||
 tar xzf "$tmp/curd.tar.gz" -C "$tmp"
 
 mkdir -p "$INSTALL_DIR"
-cp "$tmp/$name/curd" "$INSTALL_DIR/curd"
-chmod +x "$INSTALL_DIR/curd"
+# Put beside the old one and then rename over it: a `curd` that is running
+# (updating itself, say) cannot be written over, but can be replaced.
+cp "$tmp/$name/curd" "$INSTALL_DIR/curd.new"
+chmod +x "$INSTALL_DIR/curd.new"
+mv -f "$INSTALL_DIR/curd.new" "$INSTALL_DIR/curd"
 
 echo "Installed curd $version to $INSTALL_DIR/curd"
 case ":$PATH:" in

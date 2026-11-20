@@ -29,6 +29,8 @@ curd                 # start with an empty file
 
 To install by hand, download a binary from the [releases page](https://github.com/vikram5258/curd/releases)
 
+**Updating.** Inside curd, F1 and then `Update curd`: it runs the install command above over the copy of curd that is running, with the terminal to itself so you see what it does, and then opens curd again in the same folder with the same files (saved first: it does not update while there are unsaved changes). When curd starts it asks GitHub once whether a newer release is out and says so in the status bar if there is; `CURD_UPDATES=off` turns that off, and then nothing in curd touches the network but what you ask of it. The copy that is running is moved aside while the new one is put in its place (`curd.old`, removed at the next start).
+
 ## Look
 
 `curd` has three looks, called themes:
