@@ -268,7 +268,7 @@ Each assistant is a command and the words to add to it for what the panel offers
 | Key (in the panel) | What it does |
 |---|---|
 | Typing, Enter | write a question and send it; follow-ups carry on the same conversation. While it works, Enter keeps the question for when the answer ends, and Enter on the empty line then sends the kept question at once, into the answer |
-| Alt+Enter | start a new line in the question (pasted text keeps its lines too) |
+| Shift+Enter or Alt+Enter | start a new line in the question (pasted text keeps its lines too) |
 | / (at the start of the question) | list the panel's commands: `/model`, `/attach`, `/new`, `/resume`, `/mode`, `/undo`, `/changes`, `/copy`, `/bigger`, `/help`, `/hide`, and your own |
 | @ | pick a file to attach to the question; Backspace on an empty question takes the last one off |
 | Left / Right, Home / End, Backspace / Delete | edit the question |
@@ -311,6 +311,19 @@ Each assistant is a command and the words to add to it for what the panel offers
 - If the `ANTHROPIC_API_KEY` variable is set, the `claude` command bills that key instead of your subscription; the panel says so.
 - `CURD_AGENT=off curd` turns the panel off. `CURD_AGENT="some-command"` runs that in place of the assistant's program.
 - This is not an Anthropic product. Anthropic's terms do not let other programs offer Claude sign-in or handle subscription logins themselves, which is why `curd` only starts the unmodified `claude` program that you signed in to yourself.
+
+## What the terminal itself can do
+
+`curd` uses what a modern terminal (Ghostty, kitty, WezTerm, iTerm2, foot, Windows Terminal, the terminal in VS Code) can do beyond showing text, and does without where one cannot:
+
+- **Every frame in one go** (synchronized output), so a half-drawn screen is never seen.
+- **Shift+Enter** for a new line in the question, where the terminal tells it from Enter (kitty's keyboard protocol); Alt+Enter everywhere. The panel's hint says which. `CURD_KEYS=off` leaves the terminal unasked.
+- **The window title and tab** say what is going on: `curd · project`, and while Claude works, a spinner, its name and the step it is on. Terminals with a progress mark in the tab (Ghostty, kitty, Windows Terminal, VS Code) show one while it works.
+- **A notification when you are in another window**: when an answer is in, or when Claude asks something. The terminal puts it up the way it has (kitty's, Ghostty's, foot's and iTerm2's own; WezTerm's, Konsole's and GNOME's; a bell elsewhere), and only while the window is not in front. `CURD_NOTIFY=off` turns it off.
+- **Links**: a web address in an answer is a link the terminal opens on a click (with Ctrl or Cmd held, in most).
+- **Problems as curly underlines**, red for an error and yellow for a warning, in the dark and light looks.
+- **The cursor is a bar** in a line of text being typed, and as you have it elsewhere.
+- **The clipboard**: Alt+C and copying in the editor go to the system clipboard through the terminal (OSC 52), where it allows that.
 
 ## Code editing
 
