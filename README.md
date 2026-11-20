@@ -31,6 +31,42 @@ To install by hand, download a binary from the [releases page](https://github.co
 
 **Updating.** Inside curd, F1 and then `Update curd`: the install command above runs in the background over the copy of curd that is running, while you go on working, and when it is done curd opens again by itself in the same folder with the same files, nothing to press. If files have unsaved changes, or Claude is in the middle of an answer, it waits for that first and the status bar says so. When curd starts it asks GitHub once whether a newer release is out and, if there is, says so in the status bar and keeps a button there, `update to v…`, until you take it; `CURD_UPDATES=off` turns that off, and then nothing in curd touches the network but what you ask of it. The copy that is running is moved aside while the new one is put in its place (`curd.old`, removed at the next start).
 
+## Command line
+
+```sh
+curd                      an empty file to start typing in
+curd file.rs              a file (or several: curd a.rs b.rs, each in a tab)
+curd src/main.rs:42       the file with the cursor on line 42
+curd src/main.rs:42:9     line 42, column 9 (what a compiler or grep prints)
+curd +42 file.rs          the same, the way vim takes it (+ alone is the last line)
+curd .                    a folder as a project, with its file tree
+some-command | curd       the output of a pipe, as a buffer to edit
+curd -                    the same, said plainly
+curd --version            which version this is, and for which machine
+curd --help               a short version of this
+```
+
+Paths that do not exist yet are made on the first save. A file whose name
+really contains a colon is taken whole, so `curd a:b` opens `a:b` if that
+file is there. A buffer read from a pipe has no file of its own; save it
+with the save key and it asks where to put it.
+
+**Settings are environment variables**, so you can put `export CURD_…` in
+your shell profile to keep one:
+
+| Variable | What it does |
+|---|---|
+| `CURD_THEME` | `dark`, `light` or `classic`; without it, the terminal's own background decides (see Look) |
+| `CURD_LSP` | `off` turns language servers off; a command string uses a different server (see Language servers) |
+| `CURD_AGENT` | `off` turns the Claude panel off; a command string runs that in place of the assistant's program |
+| `CURD_ASK` | `off` starts the Claude panel in "may change files" instead of "asks first" |
+| `CURD_NOTIFY` | `off` stops the panel putting up a desktop notification when you are in another window |
+| `CURD_KEYS` | `off` leaves the terminal unasked what keys it can tell apart (so no Shift+Enter; a touch faster to start) |
+| `CURD_UPDATES` | `off` stops curd asking GitHub at the start whether a newer release is out |
+| `CURD_HINTS` | `off` starts without the status bar's buttons |
+| `CURD_TABS` | `auto` shows the tab bar only for two files or more |
+| `CURD_BLAME` | `off` stops showing which commit last changed each line |
+
 ## Look
 
 `curd` has three looks, called themes:
@@ -133,7 +169,7 @@ You do not have to learn the tables below: **F1** lists every command with its k
 
 `curd some-folder` opens the folder as a project. `curd some-file` works out the project from the file: its git repository if it is in one, otherwise the folder it sits in. Ctrl+B shows the tree either way.
 
-- **File tree:** folders first, then files. Folders are read only when you open them, so large projects open instantly. The tree follows the file in front, and is re-read when you save or come back to the terminal window.
+- **File tree:** folders first, then files. Folders are read only when you open them, so large projects open instantly. The tree follows the file in front, and is re-read when you save or come back to the terminal window. Drag the line between the tree and the text to make the tree wider or narrower; it keeps room for the text. (The Claude panel beside the text is draggable the same way, and Alt+Up/Down sizes it from the keys.)
 - **Git status colours**, with a letter at the right edge of the tree, the same idea as VS Code:
 
 | Colour | Letter | Meaning |
