@@ -29,7 +29,7 @@ curd                 # start with an empty file
 
 To install by hand, download a binary from the [releases page](https://github.com/vikram5258/curd/releases)
 
-**Updating.** Inside curd, F1 and then `Update curd`: the install command above runs in the background over the copy of curd that is running, while you go on working, and when it is done curd opens again by itself in the same folder with the same files, nothing to press. If files have unsaved changes, or Claude is in the middle of an answer, it waits for that first and the status bar says so. When curd starts it asks GitHub once whether a newer release is out and says so in the status bar if there is; `CURD_UPDATES=off` turns that off, and then nothing in curd touches the network but what you ask of it. The copy that is running is moved aside while the new one is put in its place (`curd.old`, removed at the next start).
+**Updating.** Inside curd, F1 and then `Update curd`: the install command above runs in the background over the copy of curd that is running, while you go on working, and when it is done curd opens again by itself in the same folder with the same files, nothing to press. If files have unsaved changes, or Claude is in the middle of an answer, it waits for that first and the status bar says so. When curd starts it asks GitHub once whether a newer release is out and, if there is, says so in the status bar and keeps a button there, `update to v…`, until you take it; `CURD_UPDATES=off` turns that off, and then nothing in curd touches the network but what you ask of it. The copy that is running is moved aside while the new one is put in its place (`curd.old`, removed at the next start).
 
 ## Look
 
