@@ -249,6 +249,7 @@ Each assistant is a command and the words to add to it for what the panel offers
 | `resume` | added to carry on a conversation, for programs that say what theirs is called; `{session}` is that name |
 | `continue` | added to carry on the last conversation, for programs that do not |
 | `model`, `models` | added to choose a model (`{model}`), and the models `/model` offers |
+| `ask` | added for a program that can ask before each thing it changes or runs, the way `claude` does: it is then given the question on its input as a line of JSON, prints a request for each thing it wants to do and reads the answer there. Leave it out for a program that cannot |
 | `read_only`, `edit`, `run` | added for what Alt+M sets: only read; change files; change files and run commands. With none of the three, the program's own settings decide and the panel says so |
 | `context` | added to tell it which file is in front and what is selected (`{context}`); without it, that goes in front of the question |
 | `format` | `"text"` (the usual): what it prints is the answer. `"claude"`: it prints what `claude --output-format stream-json` prints |
@@ -269,7 +270,7 @@ Each assistant is a command and the words to add to it for what the panel offers
 | Left / Right, Home / End, Backspace / Delete | edit the question |
 | Up / Down | bring back the questions asked before |
 | Esc | stop Claude while it is working; otherwise go back to the text (the panel stays) |
-| Alt+M | what Claude may do: change files; only read; change files and run commands |
+| Alt+M | what Claude may do: ask before each change or command; change files; only read; change files and run commands |
 | Alt+O | list the files Claude changed in its last answer, to open one |
 | Alt+U | undo Claude's changes: put those files back as they were before the answer |
 | Ctrl+N | start a new conversation |
@@ -289,7 +290,8 @@ Each assistant is a command and the words to add to it for what the panel offers
 - Answers are shown as Markdown: headings and `**bold**` in bold, `` `code` `` in colour, list items with a bullet, and blocks of code set apart by a bar and coloured like code in the editor.
 - Text selected in the file when you ask is sent along, so you can select a function and ask "what does this do?".
 
-- **May change files** is how it starts: Claude can edit and create files in the project. Open files then show what it wrote, the change markers show where, and the panel lists the files it touched. Alt+U puts them all back as they were before that answer (files over 512 KB are not kept for this), which is the way to turn a change down after looking at it. With **read only** (Alt+M) Claude can read and search but its tools for editing files and running commands are switched off. With **may change files and run commands** (Alt+M again) it can also run shell commands in the project without asking, so it can build what it wrote, run the tests and fix what fails. That is the mode for getting real work done, and the one to be careful with: a command can do anything you could do in a terminal, and Alt+U only puts files back.
+- **Asks first** is how Claude starts: before it changes a file or runs a command it stops and shows, above the question, what it wants to do, with the lines it would take out and put in, or the command. Answer with **y** (yes), **n** or Esc (no: it is told you said no, and says what it wanted instead of trying another way), or **a** (yes, and from now on always for that kind of thing, edits or commands, until a new conversation). The three answers are also buttons. Nothing is changed while it waits. Alt+M, or the mode button, goes on to the other modes below, and `CURD_ASK=off curd` starts in "may change files" as earlier versions did. An assistant that cannot ask (Cursor, opencode) does not have this mode.
+- **May change files** is the next mode: Claude can edit and create files in the project. Open files then show what it wrote, the change markers show where, and the panel lists the files it touched. Alt+U puts them all back as they were before that answer (files over 512 KB are not kept for this), which is the way to turn a change down after looking at it. With **read only** (Alt+M) Claude can read and search but its tools for editing files and running commands are switched off. With **may change files and run commands** (Alt+M again) it can also run shell commands in the project without asking, so it can build what it wrote, run the tests and fix what fails. That is the mode for getting real work done, and the one to be careful with: a command can do anything you could do in a terminal, and Alt+U only puts files back.
 - Claude is told which file is in front and the line the cursor is on, so "this function" means something. It reads files from disk, so save first.
 - If the `ANTHROPIC_API_KEY` variable is set, the `claude` command bills that key instead of your subscription; the panel says so.
 - `CURD_AGENT=off curd` turns the panel off. `CURD_AGENT="some-command"` runs that in place of the assistant's program.
