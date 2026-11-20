@@ -268,21 +268,26 @@ Each assistant is a command and the words to add to it for what the panel offers
 | Key (in the panel) | What it does |
 |---|---|
 | Typing, Enter | write a question and send it; follow-ups carry on the same conversation. While it works, Enter keeps the question for when the answer ends, and Enter on the empty line then sends the kept question at once, into the answer |
-| Shift+Enter or Alt+Enter | start a new line in the question (pasted text keeps its lines too) |
+| Shift+Enter, Alt+Enter or Ctrl+J | start a new line in the question (pasted text keeps its lines too) |
+| Tab | while it works: send what you typed into the answer it is on, now, instead of keeping it for the end |
 | / (at the start of the question) | list the panel's commands: `/model`, `/attach`, `/new`, `/resume`, `/mode`, `/undo`, `/changes`, `/copy`, `/bigger`, `/help`, `/hide`, and your own |
+| ? (on the empty question) | the page of keyboard shortcuts, with the panel's keys on it |
 | @ | pick a file to attach to the question; Backspace on an empty question takes the last one off |
 | Left / Right, Home / End, Backspace / Delete | edit the question |
-| Up / Down | bring back the questions asked before |
-| Esc | stop the answer Claude is working on; the conversation goes on from there. Otherwise go back to the text (the panel stays) |
-| Alt+M | what Claude may do: ask before each change or command; plan first; change files; only read; change files and run commands |
+| Up / Down | on the empty question, bring back the questions asked before; in a question of several lines, move between them |
+| Ctrl+O | open or close the newest step of the answer (a command, an edit, a search); again on an open command, all of what it printed |
+| Ctrl+Up / Ctrl+Down | put the keys on the newest / oldest step: Up and Down then walk the steps, Enter or Space opens and closes one, `o` opens the file it names, `c` or Ctrl+C copies what it printed or changed, Esc goes back to the question (typing does too) |
+| End / Home (on the empty question), Ctrl+End / Ctrl+Home | back to the newest line of the conversation / up to its first |
+| Esc | leave the step the keys are on; stop the answer Claude is working on, and the conversation goes on from there; otherwise go back to the text (the panel stays) |
+| Alt+M or Shift+Tab | what Claude may do: ask before each change or command; plan first; change files; only read; change files and run commands. The title says which; a click on it there goes round too |
 | Alt+O | list the files Claude changed in its last answer, to open one |
 | Alt+U | undo Claude's changes: put those files back as they were before the answer |
 | Ctrl+N | start a new conversation |
 | Ctrl+R or Alt+R | list the earlier conversations about this project; Enter shows one again and carries it on |
-| PageUp / PageDown, wheel | scroll the conversation |
+| PageUp / PageDown, wheel | scroll the conversation; scrolled up, it stays put while new lines come, and `↓ N new` at the bottom (or End) goes back down |
 | Alt+Z | make the panel as big as the screen allows, and back |
 | Alt+Up / Alt+Down, or drag the panel's edge (its title row, or the line beside it) | make the panel bigger / smaller |
-| Alt+C | copy the last answer |
+| Alt+C, or Ctrl+C on the question | copy the last answer |
 | Alt+I | hide the panel |
 
 - **Before the first question** the panel says who is signed in and offers four questions to start with; a click puts one on the line. The empty question line says what to do with it.
@@ -290,9 +295,10 @@ Each assistant is a command and the words to add to it for what the panel offers
 - **Attached files** are shown on the rule above the question. They are named to Claude along with the question, and it reads them; they go with that one question. Images can be attached the same way.
 - **Your own commands:** the `/` list also shows the commands and skills you have set up for Claude Code (in `.claude/commands` and `.claude/skills`, in the project or your home folder). Picking one puts `/name` on the question line, to send to `claude` with whatever you add. A `/name` the list does not know is put on the line the same way.
 - **Conversations are kept.** The `claude` command saves every conversation about a project, also the ones from its own terminal program and from VS Code. Ctrl+R lists them, newest first, each with how long ago it was and its first question; picking one shows what was said, with what was done back then as the same cards, and your next question carries it on.
-- **What an answer took** is at the end of the rule above the question once it is in: how long, what it cost as the `claude` command reckons it, and how much of the model's memory the conversation takes up (`44s · $0.02 · 39k of 200k context`).
-- **The look.** Your own words stand in a tinted block with a bar in the accent colour down its side, and so does the question line; the main button is in the accent too. Answers are set in the text colour, headings in the accent, code on a tinted ground, Claude's thinking faint and slanted behind a thin bar. Each question is set off from the answer before it by a thin rule, and text is kept to a width that reads well however wide the panel is. Before the first question the panel shows its name in block letters.
-- **Each thing it does is a card**: one line that starts with how it stands, a spinner while it runs, then a green ✓ or a red ✗, and says what, with a mark for the kind (`$ cargo test` for a command, `✎ src/main.rs` for an edit, `≡` for a file read, `⌕` for a search, `⚑` for a helper) and how long it took; a chevron at the end where there is more to see. While it works, the panel's title names the step it is on. Click the line to open the card: a command with the command itself and everything it printed, nothing cut; an edit as it was made, with line numbers, lines put in on a green ground and taken out on a red one; what went wrong, in red. An edit starts open and a command closed, saying how many lines it printed; one that failed opens by itself. Files it read and searches it made that follow one another are folded into one card, open to list them. What it was refused is marked `not allowed`.
+- **A strip above the question** carries what is going on. While Claude works it is the working line: a spinner, the word *Working* with a slow bright sweep over it, how long it has been, the step it is on, and `Esc stops`. When the answer is in, the strip shows what it took: how long, what it cost as the `claude` command reckons it, and a small meter of how much of the model's memory the conversation fills (`6.1s · $0.09 · ▓▓░░░░░░ 20%`). Attached files sit on the strip too, each a chip with an `✗` to take it off.
+- **The files it changed** are listed above the question after an answer that changed any: a heading `Changed 2 files` with `keep all` and `undo all`, then each file with how many lines went in and out and its own `diff`, `keep` and `undo`. Click a file's name to open it.
+- **The look.** Your own words stand in a tinted block with a bar in the accent colour down its side, and so does the question line; the main button is in the accent too. Answers are set in the text colour, headings in the accent, code on a tinted ground, Claude's thinking faint and slanted behind a thin bar. Each question is set off from the answer before it by a thin rule, and text is kept to a width that reads well however wide the panel is. Before the first question the panel shows its name in block letters. The steps can be walked with Ctrl+Up and Ctrl+Down and opened with Enter; while you read back through a long answer the view holds its place and a `↓ N new` note says what arrived.
+- **Each thing it does is a card**: one line that starts with how it stands, a spinner while it runs, then a green ✓ or a red ✗, and says what, with a mark for the kind (`$ cargo test` for a command, `✎ src/main.rs` for an edit, `≡` for a file read, `⌕` for a search, `⚑` for a helper) and how long it took; a chevron at the end where there is more to see. While it works the strip above the question names the step it is on, and the title stays still. Click the line to open the card: a command with the command itself and everything it printed, nothing cut; an edit as it was made, with line numbers, lines put in on a green ground and taken out on a red one; what went wrong, in red. An edit starts open and a command closed, saying how many lines it printed; one that failed opens by itself. Files it read and searches it made that follow one another are folded into one card, open to list them. What it was refused is marked `not allowed`.
 - **Its thinking** is shown faint while it thinks, the last few lines of it, and then as how long it took.
 - **A helper** (a second assistant Claude sets to work on a part) is a block of its own, open while it works, its line saying what it is doing right now; the helper's steps stand inside it, indented, with its words and its report, and the block folds up when the helper is done. The answer goes on until the helper has reported and Claude has taken that in.
 - **Its list of things to do** is one card by the question, kept up to date as it goes: each item with a box, ticked when done, pointed at while being done, and the count in its line.
